@@ -7,7 +7,6 @@ type Config = {
 
 type APIConfig = {
   port: number;
-  environment: string;
 };
 
 type DBConfig = {
@@ -32,10 +31,14 @@ const migrationConfig: MigrationConfig = {
 export const config: Config = {
   api: {
     port: Number(envOrThrow("PORT")),
-    environment: envOrThrow("ENVIRONMENT"),
   },
   db: {
     url: envOrThrow("DB_URL"),
     migrationConfig: migrationConfig,
   },
 };
+
+export const PARKING_LAYOUT = [
+  { type: "car", count: 20, suffix: "A" },
+  { type: "motorcycle", count: 10, suffix: "B" },
+] as const;

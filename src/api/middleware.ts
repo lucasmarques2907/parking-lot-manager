@@ -1,6 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
-import { BadRequestError, NotFoundError } from "./errors";
-import { respondWithError } from "./json";
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+  UnprocessableEntityError,
+} from "./errors.js";
+import { respondWithError } from "./json.js";
 
 export function middlewareLogResponse(
   req: Request,
@@ -32,6 +37,12 @@ export function errorMiddleware(
     message = err.message;
   } else if (err instanceof NotFoundError) {
     statusCode = 404;
+    message = err.message;
+  } else if (err instanceof ConflictError) {
+    statusCode = 409;
+    message = err.message;
+  } else if (err instanceof UnprocessableEntityError) {
+    statusCode = 422;
     message = err.message;
   }
 

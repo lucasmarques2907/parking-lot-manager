@@ -1,17 +1,17 @@
 import express from "express";
-import { config } from "./config";
+import { config } from "./config.js";
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
-import { errorMiddleware, middlewareLogResponse } from "./api/middleware";
+import { errorMiddleware, middlewareLogResponse } from "./api/middleware.js";
 import {
-  generateVehicleHandler,
   getVehicleHandler,
+  getAllVehiclesHandler,
   parkVehicleHandler,
   removeVehicleHandler,
-} from "./api/vehicles";
-import { getSpotsHandler } from "./api/parking-lot";
-import { resetHandler } from "./api/reset";
+  resetVehiclesHandler,
+} from "./api/vehicles.js";
+import { getAllParkingSpacesHandler } from "./api/parking-lot.js";
 
 const migrationClient = postgres(config.db.url, { max: 1 });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
@@ -22,30 +22,30 @@ app.use(middlewareLogResponse);
 app.use(express.json());
 
 // * Vehicles Endpoints
-app.post("/vehicles/generate", (req, res, next) => {
-  Promise.resolve(generateVehicleHandler(req, res)).catch(next);
-});
-
 app.post("/vehicles", (req, res, next) => {
   Promise.resolve(parkVehicleHandler(req, res)).catch(next);
 });
 
 app.get("/vehicles", (req, res, next) => {
+  Promise.resolve(getAllVehiclesHandler(req, res)).catch(next);
+});
+
+app.get("/vehicles/:plate", (req, res, next) => {
   Promise.resolve(getVehicleHandler(req, res)).catch(next);
 });
 
-app.delete("/vehicles/:vehicleId", (req, res, next) => {
+app.delete("/vehicles/reset", (req, res, next) => {
+  Promise.resolve(resetVehiclesHandler(req, res)).catch(next);
+});
+
+app.delete("/vehicles/:plate", (req, res, next) => {
   Promise.resolve(removeVehicleHandler(req, res)).catch(next);
 });
 
-// * Parking Lot Endpoints
-app.get("/parking-lot", (req, res, next) => {
-  Promise.resolve(getSpotsHandler(req, res)).catch(next);
-});
 
-// * Extras
-app.get("/reset", (req, res, next) => {
-  Promise.resolve(resetHandler(req, res)).catch(next);
+// * Parking Lot Endpoints
+app.get("/parking-spaces", (req, res, next) => {
+  Promise.resolve(getAllParkingSpacesHandler(req, res)).catch(next);
 });
 
 app.use(errorMiddleware);
