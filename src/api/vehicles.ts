@@ -11,7 +11,6 @@ import {
   getParkingSpaceWithVehicle,
   getVehicleByPlate,
   getVehicles,
-  resetVehicles,
 } from "../db/queries/parking.js";
 import { respondWithJSON } from "./json.js";
 
@@ -109,15 +108,6 @@ export async function removeVehicleHandler(req: Request, res: Response) {
   const deleted = await deleteVehicle(vehicle.plate);
   if (!deleted) {
     throw new Error(`Falha ao remover veículo com a placa ${vehicle.plate}`);
-  }
-
-  res.status(204).send();
-}
-
-export async function resetVehiclesHandler(req: Request, res: Response) {
-  const deleted = await resetVehicles();
-  if (!deleted) {
-    throw new Error(`Falha ao remover todos os veículos`);
   }
 
   res.status(204).send();

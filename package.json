@@ -9,10 +9,13 @@
     "dev": "bun --watch src/index.ts",
     "generate": "drizzle-kit generate",
     "migrate": "drizzle-kit migrate",
-    "seed": "bun src/db/seeds/index.ts"
+    "seed": "bun src/db/seeds/index.ts",
+    "typecheck": "tsc --noEmit",
+    "build:vercel": "bun run typecheck && bun run migrate && bun run seed"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "drizzle-kit": "^0.31.11"
   },
@@ -20,8 +23,10 @@
     "typescript": "^7"
   },
   "dependencies": {
+    "cors": "^2.8.6",
     "drizzle-orm": "^0.45.3",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
     "postgres": "^3.4.9"
   }
 }

@@ -6,6 +6,18 @@ import {
   UnprocessableEntityError,
 } from "./errors.js";
 import { respondWithError } from "./json.js";
+import rateLimit from "express-rate-limit";
+
+export const LIMITER = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  ipv6Subnet: 56,
+  message: {
+    error: "Muitas requisições. Por favor, aguarde e tente novamente.",
+  },
+});
 
 export function middlewareLogResponse(
   req: Request,
