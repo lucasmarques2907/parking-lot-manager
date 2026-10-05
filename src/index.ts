@@ -1,24 +1,31 @@
 import express from "express";
 import { config } from "./config.js";
-import postgres from "postgres";
-import { drizzle } from "drizzle-orm/postgres-js";
-import { migrate } from "drizzle-orm/postgres-js/migrator";
-import { errorMiddleware, middlewareLogResponse } from "./api/middleware.js";
+import {
+  errorMiddleware,
+  LIMITER,
+  middlewareLogResponse,
+} from "./api/middleware.js";
 import {
   getVehicleHandler,
   getAllVehiclesHandler,
   parkVehicleHandler,
   removeVehicleHandler,
-  resetVehiclesHandler,
 } from "./api/vehicles.js";
 import { getAllParkingSpacesHandler } from "./api/parking-lot.js";
-
-const migrationClient = postgres(config.db.url, { max: 1 });
-await migrate(drizzle(migrationClient), config.db.migrationConfig);
+import cors from "cors";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(middlewareLogResponse);
+app.use(
+  cors({
+    origin: config.api.allowedOrigins,
+    methods: ["GET", "POST", "DELETE"],
+  }),
+);
+app.use(LIMITER);
 app.use(express.json());
 
 // * Vehicles Endpoints
@@ -34,14 +41,9 @@ app.get("/vehicles/:plate", (req, res, next) => {
   Promise.resolve(getVehicleHandler(req, res)).catch(next);
 });
 
-app.delete("/vehicles/reset", (req, res, next) => {
-  Promise.resolve(resetVehiclesHandler(req, res)).catch(next);
-});
-
 app.delete("/vehicles/:plate", (req, res, next) => {
   Promise.resolve(removeVehicleHandler(req, res)).catch(next);
 });
-
 
 // * Parking Lot Endpoints
 app.get("/parking-spaces", (req, res, next) => {
@@ -50,6 +52,10 @@ app.get("/parking-spaces", (req, res, next) => {
 
 app.use(errorMiddleware);
 
-app.listen(config.api.port, () => {
-  console.log(`Server is running at https://localhost:${config.api.port}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(config.api.port, () => {
+    console.log(`Server is running at https://localhost:${config.api.port}`);
+  });
+}
+
+export default app;

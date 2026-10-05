@@ -1,4 +1,5 @@
 import type { MigrationConfig } from "drizzle-orm/migrator";
+import { existsSync } from "node:fs";
 
 type Config = {
   api: APIConfig;
@@ -7,6 +8,7 @@ type Config = {
 
 type APIConfig = {
   port: number;
+  allowedOrigins: string[];
 };
 
 type DBConfig = {
@@ -14,7 +16,9 @@ type DBConfig = {
   migrationConfig: MigrationConfig;
 };
 
-process.loadEnvFile();
+if (existsSync(".env")) {
+  process.loadEnvFile();
+}
 
 function envOrThrow(key: string) {
   const value = process.env[key];
@@ -31,6 +35,7 @@ const migrationConfig: MigrationConfig = {
 export const config: Config = {
   api: {
     port: Number(envOrThrow("PORT")),
+    allowedOrigins: envOrThrow("ALLOWED_ORIGINS").split(","),
   },
   db: {
     url: envOrThrow("DB_URL"),

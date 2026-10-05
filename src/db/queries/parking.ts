@@ -53,8 +53,3 @@ export async function deleteVehicle(plate: string) {
     .returning();
   return rows.length > 0;
 }
-
-export async function resetVehicles() {
-  const rows = await db.delete(vehicles).returning();
-  return rows.length > 0;
-}
